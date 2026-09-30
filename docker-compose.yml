@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: encore
+      POSTGRES_PASSWORD: encore
+      POSTGRES_DB: encore
+    ports:
+      - "5432:5432"
+    volumes:
+      - encore_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U encore -d encore"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  encore_pg:
