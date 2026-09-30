@@ -16,7 +16,12 @@ export async function POST(
   const requestId = requestIdFrom(request);
   const { eventId } = await ctx.params;
   try {
-    const body: unknown = await request.json();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      throw new ApiError(400, "INVALID_JSON", "Request body must be valid JSON.");
+    }
     if (!isRecord(body)) {
       throw new ApiError(400, "INVALID_BODY", "JSON object required.");
     }

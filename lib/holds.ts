@@ -94,6 +94,14 @@ export async function cancelHold(
   if (!hold) {
     throw new ApiError(404, "HOLD_NOT_FOUND", `No hold ${holdId}.`);
   }
+  await expireStaleHolds(client, hold.tier_id);
+  if (hold.expires_at <= new Date()) {
+    throw new ApiError(
+      409,
+      "HOLD_NOT_ACTIVE",
+      `Hold ${holdId} is expired, so it cannot be cancelled.`
+    );
+  }
   if (hold.status !== "active") {
     throw new ApiError(
       409,

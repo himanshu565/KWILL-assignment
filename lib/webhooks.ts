@@ -120,6 +120,22 @@ async function applyRefundToOrder(
   orderId: string,
   amountRefunded: number
 ): Promise<OrderRow | null> {
+  const existing = await query<{ amount_total: number }>(
+    client,
+    `SELECT amount_total FROM orders WHERE id = $1 FOR UPDATE`,
+    [orderId]
+  );
+  const order = existing.rows[0];
+  if (!order) {
+    return null;
+  }
+  if (amountRefunded > order.amount_total) {
+    throw new ApiError(
+      422,
+      "REFUND_EXCEEDS_ORDER",
+      "amount_refunded cannot exceed amount_total."
+    );
+  }
   const updated = await query<OrderRow>(
     client,
     `UPDATE orders
@@ -240,6 +256,13 @@ async function handlePaid(
     webhook.quantity,
     webhook.hold_id
   );
+  if (!holdId) {
+    throw new ApiError(
+      409,
+      "HOLD_NOT_FOUND",
+      "The paid order does not have a matching active hold."
+    );
+  }
 
   await applyStoredRefunds(client, webhook.order_id);
 

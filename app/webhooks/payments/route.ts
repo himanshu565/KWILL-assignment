@@ -1,5 +1,5 @@
 import { withTransaction } from "@/lib/db";
-import { jsonError, jsonOk } from "@/lib/errors";
+import { ApiError, jsonError, jsonOk } from "@/lib/errors";
 import { requestIdFrom, logEvent } from "@/lib/request";
 import { parsePaymentWebhook, processPaymentWebhook } from "@/lib/webhooks";
 
@@ -8,7 +8,12 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   const requestId = requestIdFrom(request);
   try {
-    const body: unknown = await request.json();
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      throw new ApiError(400, "INVALID_JSON", "Request body must be valid JSON.");
+    }
     const webhook = parsePaymentWebhook(body);
     const result = await withTransaction((client) =>
       processPaymentWebhook(client, webhook)

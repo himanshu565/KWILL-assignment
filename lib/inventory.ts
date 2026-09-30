@@ -63,7 +63,7 @@ export async function getEventWithInventory(
      LEFT JOIN (
        SELECT tier_id, SUM(quantity)::int AS sold
        FROM orders
-       WHERE status = 'paid'
+       WHERE status IN ('paid', 'partially_refunded')
        GROUP BY tier_id
      ) o ON o.tier_id = t.id
      WHERE t.event_id = $1

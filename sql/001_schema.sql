@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS orders (
   quantity INTEGER NOT NULL CHECK (quantity > 0),
   status order_status NOT NULL,
   amount_total INTEGER NOT NULL CHECK (amount_total >= 0),
-  amount_refunded INTEGER NOT NULL DEFAULT 0 CHECK (amount_refunded >= 0),
+  amount_refunded INTEGER NOT NULL DEFAULT 0 CHECK (amount_refunded >= 0 AND amount_refunded <= amount_total),
   currency VARCHAR(3) NOT NULL CHECK (currency ~ '^[A-Z]{3}$'),
   paid_at TIMESTAMPTZ,
   refunded_at TIMESTAMPTZ,
@@ -74,7 +74,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS holds_converted_order_uidx ON holds (converted
   WHERE converted_order_id IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS orders_tier_paid_idx ON orders (tier_id)
-  WHERE status = 'paid';
+  WHERE status IN ('paid', 'partially_refunded');
 
 CREATE INDEX IF NOT EXISTS webhook_events_order_idx ON webhook_events ((payload ->> 'order_id'));
 CREATE INDEX IF NOT EXISTS webhook_events_type_idx ON webhook_events (event_type);

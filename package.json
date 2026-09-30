@@ -12,9 +12,7 @@
     "db:seed": "tsx scripts/seed.ts",
     "db:reset": "tsx scripts/seed.ts --clean",
     "webhook": "tsx scripts/mock-processor.ts",
-    "scenario:c": "tsx scripts/scenario-c.ts",
-    "demo": "tsx scripts/demo-all.ts",
-    "test": "tsx --test tests/**/*.test.ts"
+    "scenario:c": "tsx scripts/scenario-c.ts"
   },
   "dependencies": {
     "nanoid": "^6.0.1",
